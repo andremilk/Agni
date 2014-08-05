@@ -1,37 +1,29 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <string.h>
-
+/*
+Code changed from:
+http://www.dimuthu.org/blog/2009/01/28/making-web-requests-using-curl-from-c-and-php/comment-page-1/
+*/
 /* function prototypes to define later */
-char *do_web_request(char *url);
 size_t static write_callback_func(void *buffer,
                         size_t size,
                         size_t nmemb,
                         void *userp);
 
-/* the main function invoking */
-/*int main()
-{
-    char *url = "http://127.0.0.1:5000/health/";
-    char *content = NULL;
-
-    content = do_web_request(url);
-
-    printf("%s", content);
-}*/
+void get_request_info(CURL *curl_handle);
 
 /* the function to return the content for a url */
-char *do_web_request(char *url)
+int do_web_request(char *url)
 {
 
     /* keeps the handle to the curl object */
     CURL *curl_handle = NULL;
-    /* to keep the response */
     char *response = NULL;
+    /* to keep the response */
 
     /* initializing curl and setting the url */
     curl_handle = curl_easy_init();
-//   curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1); <-- verbose options :3
     curl_easy_setopt(curl_handle, CURLOPT_URL, url);
     curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1);
 
@@ -45,12 +37,11 @@ char *do_web_request(char *url)
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &response);
 
     /* perform the request */
+    long resposta;
     curl_easy_perform(curl_handle);
-
-    /* cleaning all curl stuff */
     curl_easy_cleanup(curl_handle);
-
-    return response;
+    curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &resposta);
+    return resposta;
 }
 
 /* the function to invoke as the data recieved */
@@ -62,6 +53,6 @@ size_t static write_callback_func(void *buffer,
     char **response_ptr =  (char**)userp;
 
     /* assuming the response is a string */
-    *response_ptr = strndup(buffer, (size_t)(size *nmemb));
-
+    //*response_ptr = strndup(buffer, (size_t)(size *nmemb));
 }
+

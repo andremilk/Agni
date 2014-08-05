@@ -1,39 +1,45 @@
 #include <stdio.h>
 #include <omp.h>
+#include <sys/time.h>
 #include "getter.c"
-/*#include <curl/curl.h>
-#include <curl/easy.h>
-#include <string.h>
-*/
+
 int main(int argc, char **argv)
 {
-    if(argc < 5) {
-        printf("Usage: agni target no_of_requests rate threads\n");
+    if(argc < 3) {
+        printf("Usage: agni target no_of_requests\n");
         return 0;
     }
-    int i, thread_id, nloops;
+    int i;
         
     char *target = argv[1];
     long no_of_reqs = atol(argv[2]);
-    long reqs_per_sec = atol(argv[3]);
-    int _threads = atol(argv[4]);
-    
-    #pragma omp parallel private(thread_id, nloops)
+    long s2xx = 0;
+    long s3xx = 0;
+    long s4xx = 0;
+    long s5xx = 0;
+    omp_set_dynamic(0);
+    omp_set_num_threads(100);
+    time_t start = time(NULL);
+    #pragma omp parallel shared(s2xx, s3xx, s4xx, s5xx)
     {
-        nloops = 0;
         #pragma omp for
             for (i = 0; i < no_of_reqs; i++) {
-                do_web_request(target);
-                ++nloops;
+                 int x;
+                 x = (int) do_web_request(target);
+                 if(x/100 == 2)
+                     s2xx++;
+                 else if(x/100 == 3)
+                     s3xx++;
+                 else if(x/100 == 4)
+                     s4xx++;
+                 else 
+                     s5xx++;
             }
-
-        thread_id = omp_get_thread_num();
-        printf("Thread %d performed %d interations of the loop.\n",
-               thread_id, nloops);
     }
-        printf("%s\n", target);
-        printf("%ld\n", no_of_reqs);
-        printf("%ld\n", reqs_per_sec);
-        printf("%d\n", _threads);
+    printf("\n 2xx = %ld\n", s2xx);
+    printf("\n 3xx = %ld", s3xx);
+    printf("\n 4xx = %ld", s4xx);
+    printf("\n 5xx = %ld", s5xx);
+    printf("\n time elapsed = %.2f\n", (double)time(NULL) - start);
 }
 
