@@ -17,19 +17,17 @@ int main(int argc, char **argv)
     long s3xx = 0;
     long s4xx = 0;
     long s5xx = 0;
-    omp_set_dynamic(0);
-    omp_set_num_threads(100);
     time_t start = time(NULL);
-    #pragma omp parallel shared(s2xx, s3xx, s4xx, s5xx)
+    #pragma omp parallel shared(s2xx, s3xx, s4xx, s5xx, i) num_threads(100)
     {
         #pragma omp for
             for (i = 0; i < no_of_reqs; i++) {
-                 int x;
+                int x;
                  x = (int) do_web_request(target);
-                 if(x/100 == 2)
-                     s2xx++;
-                 else if(x/100 == 3)
+                 if(x/100 == 3)
                      s3xx++;
+                 else if(x/100 == 2)
+                     s2xx++;
                  else if(x/100 == 4)
                      s4xx++;
                  else 
