@@ -39,8 +39,9 @@ int do_web_request(char *url)
     /* perform the request */
     long resposta;
     curl_easy_perform(curl_handle);
-    curl_easy_cleanup(curl_handle);
     curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &resposta);
+    curl_easy_cleanup(curl_handle);
+
     return resposta;
 }
 
