@@ -6,19 +6,20 @@
 int main(int argc, char **argv)
 {
     if(argc < 3) {
-        printf("Usage: agni target no_of_requests\n");
+        printf("Usage: agni target no_of_requests threads\n");
         return 0;
     }
     int i;
         
     char *target = argv[1];
+    int num_of_threads = atoi(argv[3]);
     long no_of_reqs = atol(argv[2]);
     long s2xx = 0;
     long s3xx = 0;
     long s4xx = 0;
     long s5xx = 0;
     time_t start = time(NULL);
-    #pragma omp parallel shared(s2xx, s3xx, s4xx, s5xx, i) num_threads(100)
+    #pragma omp parallel shared(s2xx, s3xx, s4xx, s5xx, i) num_threads(num_of_threads)
     {
         #pragma omp for
             for (i = 0; i < no_of_reqs; i++) {
